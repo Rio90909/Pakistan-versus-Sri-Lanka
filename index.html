@@ -16,9 +16,11 @@
         input { user-select: auto; }
         #app { display: flex; flex-direction: column; height: 100%; width: 100%; position: relative; overflow: hidden; }
         
-        /* Header */
-        .top-bar { flex-shrink: 0; padding: 12px; text-align: center; background: rgba(0,0,0,0.8); border-bottom: 1px solid var(--glass); z-index: 10; }
+        /* HEADER & PROFILE BUTTON */
+        .top-bar { position: relative; flex-shrink: 0; padding: 14px 12px; text-align: center; background: rgba(0,0,0,0.8); border-bottom: 1px solid var(--glass); z-index: 10; }
         .live-tag { background: #ff004c; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 900; letter-spacing: 1px; vertical-align: middle; margin-right: 8px; animation: pulse 1.5s infinite; }
+        .profile-btn { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); background: var(--glass); border: 1px solid var(--glass-border); border-radius: 50%; width: 34px; height: 34px; color: white; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; transition: 0.2s; }
+        .profile-btn:active { background: rgba(255,255,255,0.2); transform: translateY(-50%) scale(0.9); }
         
         /* Layout */
         .view-wrapper { flex: 1; position: relative; overflow: hidden; }
@@ -71,12 +73,12 @@
 
         /* Other UI */
         .card { background: var(--glass); border-radius: 16px; padding: 15px; border: 1px solid var(--glass-border); margin-bottom: 15px; flex-shrink: 0;}
-        .btn { background: #01411C; color: white; border: 1px solid #a3ff00; padding: 15px; border-radius: 10px; font-weight: 900; font-size: 16px; width: 100%; margin-top: 10px; text-transform: uppercase; }
+        .btn { background: #01411C; color: white; border: 1px solid #a3ff00; padding: 15px; border-radius: 10px; font-weight: 900; font-size: 16px; width: 100%; margin-top: 10px; text-transform: uppercase; cursor: pointer; }
         .calc-input { width: 100%; background: rgba(0,0,0,0.4); border: 1px solid var(--glass-border); color: white; padding: 15px; border-radius: 10px; font-size: 16px; outline: none; margin-bottom: 10px; }
         
         /* Squad Section Fixes */
         .squad-toggle { display: flex; background: rgba(0,0,0,0.5); border-radius: 10px; padding: 5px; margin-bottom: 15px; border: 1px solid var(--glass-border); flex-shrink: 0; }
-        .sq-btn { flex: 1; background: transparent; border: none; color: rgba(255,255,255,0.5); padding: 12px; font-weight: bold; border-radius: 6px; transition: 0.3s; font-size: 14px; }
+        .sq-btn { flex: 1; background: transparent; border: none; color: rgba(255,255,255,0.5); padding: 12px; font-weight: bold; border-radius: 6px; transition: 0.3s; font-size: 14px; cursor: pointer; }
         .sq-btn.active.pak { background: #01411C; color: white; }
         .sq-btn.active.sl { background: #002366; color: white; }
         .squad-list { display: none; }
@@ -94,12 +96,13 @@
         .send-btn { background: var(--neon) !important; color: black !important; border: none !important; border-radius: 50% !important; width: 45px !important; height: 45px !important; min-width: 45px !important; flex: 0 0 auto !important; display: flex !important; justify-content: center !important; align-items: center !important; font-size: 18px !important; margin-left: 2px; cursor: pointer; }
         #img-upload { display: none; }
 
-        /* Nav & Overlays */
+        /* Nav */
         .nav-bar { position: absolute; bottom: 12px; left: 12px; right: 12px; height: var(--nav-h); background: rgba(15,15,15,0.95); backdrop-filter: blur(20px); border-radius: 20px; border: 1px solid var(--glass-border); display: flex; justify-content: space-around; align-items: center; z-index: 1000; box-shadow: 0 5px 20px rgba(0,0,0,0.8); }
-        .nav-tab { color: rgba(255,255,255,0.4); text-align: center; font-size: 10px; flex: 1; font-weight: bold; transition: 0.2s;}
+        .nav-tab { color: rgba(255,255,255,0.4); text-align: center; font-size: 10px; flex: 1; font-weight: bold; transition: 0.2s; cursor: pointer; }
         .nav-tab.active { color: white; transform: translateY(-3px); }
         .nav-tab i { display: block; font-size: 24px; margin-bottom: 3px; }
         
+        /* Modal */
         #name-modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.9); display: none; justify-content: center; align-items: center; z-index: 9999; padding: 20px; animation: fadeIn 0.3s ease; }
         .modal-card { background: var(--dark); border: 2px solid var(--neon); border-radius: 20px; padding: 25px; width: 100%; text-align: center; box-shadow: 0 0 30px rgba(163,255,0,0.1);}
         #toast-container { position: fixed; bottom: 90px; left: 0; right: 0; display: flex; flex-direction: column; align-items: center; gap: 8px; z-index: 8000; pointer-events: none; }
@@ -115,18 +118,24 @@
 
 <div id="name-modal">
     <div class="modal-card">
-        <h2 style="color: white; margin-top: 0;">WHO IS CHEERING?</h2>
-        <p style="font-size: 12px; opacity: 0.7; margin-bottom: 20px;">Enter your Fan Name to unlock the chat room.</p>
+        <h2 style="color: white; margin-top: 0;">FAN PROFILE</h2>
+        <p style="font-size: 12px; opacity: 0.7; margin-bottom: 20px;">Enter your name to unlock the chat room or update your identity.</p>
         <input type="text" id="username-input" class="calc-input" placeholder="Your Fan Name" maxlength="15">
-        <button class="btn" onclick="saveName()">UNLOCK CHAT</button>
-        <button onclick="closeNameModal()" style="background:none; border:none; color:#888; font-size:12px; margin-top:15px; text-decoration:underline;">Cancel</button>
+        <button class="btn" onclick="saveName()">SAVE & UNLOCK CHAT</button>
+        <button onclick="closeNameModal()" style="background:none; border:none; color:#888; font-size:12px; margin-top:15px; text-decoration:underline; cursor: pointer;">Cancel</button>
     </div>
 </div>
 
 <div id="toast-container"></div>
 
 <div id="app">
-    <div class="top-bar"><span class="live-tag">SUPER 8</span><span style="font-weight: 900; font-size: 15px;">PAKISTAN vs SRI LANKA</span></div>
+    <div class="top-bar">
+        <div>
+            <span class="live-tag">SUPER 8</span>
+            <span style="font-weight: 900; font-size: 15px;">PAKISTAN vs SRI LANKA</span>
+        </div>
+        <button class="profile-btn" onclick="openProfile()" title="Edit Profile">👤</button>
+    </div>
 
     <div class="view-wrapper">
         <div id="match" class="view active">
@@ -208,7 +217,6 @@
                 <div id="list-pak" class="squad-list active">
                     <div style="text-align:center; opacity:0.5; font-style:italic;">Waiting for Pakistan 11...</div>
                 </div>
-                
                 <div id="list-sl" class="squad-list">
                     <div style="text-align:center; opacity:0.5; font-style:italic;">Waiting for Sri Lanka 11...</div>
                 </div>
@@ -249,12 +257,22 @@
     function showToast(m) { const c = document.getElementById('toast-container'); const t = document.createElement('div'); t.className='toast'; t.innerText=m; c.appendChild(t); setTimeout(()=>t.remove(), 4000); }
     let myName = localStorage.getItem("pak_fan_name");
     
+    // --- PROFILE & AUTHENTICATION LOGIC ---
+    function openProfile() {
+        // Pre-fill the input with their current name if it exists
+        document.getElementById('username-input').value = myName || "";
+        document.getElementById('name-modal').style.display = 'flex';
+    }
+    
     function closeNameModal() { document.getElementById('name-modal').style.display = 'none'; }
+    
     function saveName() { 
         const i = document.getElementById('username-input').value.trim(); 
         if (!i) { showToast("Enter a name to continue!"); return; } 
-        myName = i; localStorage.setItem("pak_fan_name", myName); 
-        closeNameModal(); showToast("Welcome to the Stadium, " + myName + "!"); 
+        myName = i; 
+        localStorage.setItem("pak_fan_name", myName); 
+        closeNameModal(); 
+        showToast("Profile set to: " + myName); 
     }
 
     function triggerAuthOrAction(actionType) {
@@ -263,6 +281,7 @@
         if(actionType === 'image') document.getElementById('img-upload').click();
         if(actionType === 'link') sendImageLink();
     }
+    // ----------------------------------------
 
     function switchTab(id, el) { document.querySelectorAll('.view, .nav-tab').forEach(e => e.classList.remove('active')); document.getElementById(id).classList.add('active'); el.classList.add('active'); }
     function toggleSquad(t) { document.querySelectorAll('.sq-btn, .squad-list').forEach(e => e.classList.remove('active')); document.getElementById('btn-'+t).classList.add('active'); document.getElementById('list-'+t).classList.add('active'); }
@@ -310,6 +329,7 @@
         if (snap.exists() && snap.val().override === true) {
             isOverrideActive = true;
             const data = snap.val();
+            
             let battingTeam = detectBattingTeam(data.pak, data.sl, data.batting);
             updateScoreboardUI(battingTeam, data.pak, data.sl);
             document.getElementById('match-note').innerText = data.status || "0.0 OVERS";
