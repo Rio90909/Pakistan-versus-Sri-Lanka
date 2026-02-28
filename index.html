@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PAK vs SL | Miracle Command Center</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+    <style>
+        /* === VISUAL THEME: PATRIOTIC BROADCAST === */
+        :root { --dark: #020503; --glass: rgba(255, 255, 255, 0.08); --glass-border: rgba(255, 255, 255, 0.15); --nav-h: 75px; --neon: #a3ff00; }
+        * { box-sizing: border-box; font-family: 'Segoe UI', Roboto, sans-serif; user-select: none; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--dark); color: white; margin: 0; padding: 0; height: 100vh; overflow: hidden; }
+        input { user-select: auto; }
+        #app { display: flex; flex-direction: column; height: 100vh; position: relative; }
+        .view { flex: 1; overflow-y: auto; padding: 15px; display: none; padding-bottom: 100px; }
+        .view.active { display: block; animation: fadeIn 0.4s ease; }
+
+        /* Header & Timer */
+        .top-bar { padding: 15px; text-align: center; background: rgba(0,0,0,0.8); border-bottom: 1px solid var(--glass); z-index: 10; }
+        .live-tag { background: #ff004c; padding: 3px 10px; border-radius: 6px; font-size: 11px; font-weight: 900; letter-spacing: 1px; vertical-align: middle; margin-right: 8px; animation: pulse 1.5s infinite; }
+        .timer-hero { background: linear-gradient(180deg, #111, var(--dark)); padding: 20px 15px; border-radius: 16px; text-align: center; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 15px; }
+        .timer-title { font-size: 11px; font-weight: bold; letter-spacing: 3px; color: rgba(255,255,255,0.7); margin-bottom: 15px; }
+        .timer-grid { display: flex; justify-content: center; gap: 15px; }
+        .timer-box { background: rgba(0,0,0,0.4); width: 60px; padding: 10px 0; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2); }
+        .t-val { display: block; font-size: 24px; font-weight: 900; color: var(--neon); }
+        .t-lbl { font-size: 9px; opacity: 0.6; color: white; }
+
+        /* ========================================= */
+        /* HIGH-DEF BROADCAST SCOREBOARD             */
+        /* ========================================= */
+        .broadcast-board { border-radius: 12px; overflow: hidden; border: 1px solid #333; margin-bottom: 20px; box-shadow: 0 8px 25px rgba(0,0,0,0.8); background: #111; }
+        .bb-header { background: #000; padding: 8px; text-align: center; font-size: 11px; font-weight: bold; color: rgba(255,255,255,0.6); letter-spacing: 1.5px; }
+        
+        .theme-pak { background: #01411C; border-bottom: 3px solid #a3ff00; }
+        .theme-pak .bb-score-box { background: #000; color: #a3ff00; border-left: 2px solid #a3ff00; }
+        .theme-sl { background: #002366; border-bottom: 3px solid #FFD700; }
+        .theme-sl .bb-score-box { background: #000; color: #FFD700; border-left: 2px solid #FFD700; }
+
+        .bb-main { display: flex; transition: background 0.3s; }
+        .bb-team-label { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 10px; border-right: 1px solid rgba(255,255,255,0.1); }
+        .main-flag-img { width: 45px; height: auto; border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.5); margin-bottom: 5px; }
+        .main-team-text { font-size: 22px; font-weight: 900; color: white; line-height: 1; }
+        .bb-score-box { flex: 2; font-size: 32px; font-weight: 900; display: flex; align-items: center; justify-content: center; }
+        .bb-overs-box { background: white; color: black; font-size: 14px; font-weight: 900; padding: 10px; display: flex; align-items: center; justify-content: center; min-width: 90px; text-align: center; }
+        
+        /* NEW: LIVE PLAYER STATS ROW (The Tapmad Detail) */
+        .bb-live-stats { display: flex; background: #151525; border-bottom: 1px solid #333; font-size: 12px; }
+        .bb-batters { flex: 1.2; padding: 10px; border-right: 1px solid #333; }
+        .bb-bowlers { flex: 1; padding: 10px; display: flex; flex-direction: column; justify-content: space-between; }
+        
+        .stat-row { display: flex; justify-content: space-between; margin-bottom: 6px; align-items: center; }
+        .stat-row:last-child { margin-bottom: 0; }
+        .p-name { font-weight: bold; color: white; display: flex; align-items: center; gap: 5px;}
+        .p-name.active::before { content: "🏏"; font-size: 10px; }
+        .p-runs { font-weight: 900; color: #FFD700; }
+        .p-balls { opacity: 0.6; font-size: 10px; margin-left: 5px; color: white; }
+        
+        /* NEW: RECENT BALLS TIMELINE */
+        .recent-balls { display: flex; gap: 4px; margin-top: 8px; justify-content: flex-end; }
+        .ball-circle { width: 20px; height: 20px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 10px; font-weight: 900; background: #333; color: white; border: 1px solid rgba(255,255,255,0.2); }
+        .ball-4 { background: #007bff; border-color: #007bff; }
+        .ball-6 { background: #8e44ad; border-color: #8e44ad; }
+        .ball-w { background: #dc3545; border-color: #dc3545; }
+
+        .bb-sub { display: flex; background: #0a0a0a; padding: 10px 15px; justify-content: space-between; align-items: center; font-size: 16px; font-weight: bold; color: rgba(255,255,255,0.8); }
+        .sub-team-container { display: flex; align-items: center; gap: 10px; }
+        .sub-flag-img { width: 25px; border-radius: 3px; }
+        
+        .bb-mission { background: #e0e0e0; color: #d81b60; text-align: center; padding: 8px; font-size: 13px; font-weight: 900; text-transform: uppercase; display: none; }
+        .bb-toss { background: #FFD700; color: #000; text-align: center; padding: 7px; font-size: 12px; font-weight: 900; text-transform: uppercase; border-top: 1px solid #ccaa00; }
+
+        /* Other UI */
+        .card { background: var(--glass); border-radius: 20px; padding: 20px; border: 1px solid var(--glass-border); margin-bottom: 15px; }
+        .btn { background: #01411C; color: white; border: 1px solid #a3ff00; padding: 15px; border-radius: 12px; font-weight: 900; font-size: 16px; width: 100%; margin-top: 15px; text-transform: uppercase; }
+        .calc-input { width: 100%; background: rgba(0,0,0,0.4); border: 1px solid var(--glass-border); color: white; padding: 15px; border-radius: 12px; font-size: 18px; outline: none; margin-bottom: 10px; }
+        .squad-toggle { display: flex; background: rgba(0,0,0,0.5); border-radius: 12px; padding: 5px; margin-bottom: 15px; border: 1px solid var(--glass-border); }
+        .sq-btn { flex: 1; background: transparent; border: none; color: rgba(255,255,255,0.5); padding: 12px; font-weight: bold; border-radius: 8px; transition: 0.3s; }
+        .sq-btn.active.pak { background: #01411C; color: white; }
+        .sq-btn.active.sl { background: #002366; color: white; }
+        .squad-list { display: none; }
+        .squad-list.active { display: block; animation: slideUp 0.3s ease; }
+        .player-item { padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 15px; display: flex; align-items: center; gap: 10px; }
+
+        /* Chat */
+        #chat-view { display: flex; flex-direction: column; height: 100%; }
+        .msg-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding-bottom: 10px; }
+        .msg-bubble { background: #111; padding: 12px 16px; border-radius: 18px; border-bottom-left-radius: 4px; border: 1px solid var(--glass-border); word-wrap: break-word; }
+        .msg-user { color: var(--neon); font-size: 11px; font-weight: 900; margin-bottom: 4px; display: block;}
+        .chat-img { max-width: 100%; border-radius: 12px; margin-top: 5px; border: 1px solid var(--glass-border); }
+        .chat-controls { display: flex; gap: 8px; background: rgba(0,0,0,0.8); padding: 10px; border-radius: 30px; border: 1px solid var(--glass-border); margin-top: 10px; align-items: center; }
+        .chat-controls input[type="text"] { background: none; border: none; color: white; flex: 1; outline: none; padding-left: 10px; font-size: 16px; min-width: 0; }
+        .icon-btn { background: none; border: none; font-size: 22px; cursor: pointer; padding: 5px; flex: 0 0 auto; filter: grayscale(0%); }
+        .send-btn { background: var(--neon) !important; color: black !important; border: none !important; border-radius: 50% !important; width: 45px !important; height: 45px !important; min-width: 45px !important; flex: 0 0 auto !important; display: flex !important; justify-content: center !important; align-items: center !important; font-size: 18px !important; margin-left: 2px; cursor: pointer; }
+        #img-upload { display: none; }
+
+        /* Nav */
+        .nav-bar { position: fixed; bottom: 15px; left: 15px; right: 15px; height: var(--nav-h); background: rgba(10,10,10,0.95); backdrop-filter: blur(20px); border-radius: 25px; border: 1px solid var(--glass-border); display: flex; justify-content: space-around; align-items: center; z-index: 1000; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
+        .nav-tab { color: rgba(255,255,255,0.4); text-align: center; font-size: 10px; flex: 1; font-weight: bold; transition: 0.2s;}
+        .nav-tab.active { color: white; transform: translateY(-3px); }
+        .nav-tab i { display: block; font-size: 24px; margin-bottom: 5px; }
+        #name-modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.9); display: flex; justify-content: center; align-items: center; z-index: 9999; padding: 20px; }
+        .modal-card { background: var(--dark); border: 2px solid var(--neon); border-radius: 24px; padding: 30px; width: 100%; text-align: center; }
+        #toast-container { position: fixed; bottom: 100px; left: 0; right: 0; display: flex; flex-direction: column; align-items: center; gap: 10px; z-index: 8000; pointer-events: none; }
+        .toast { background: white; color: black; padding: 12px 24px; border-radius: 30px; font-weight: bold; font-size: 14px; animation: slideUp 0.3s forwards, fadeOut 0.3s forwards 3.7s; text-align: center; border: 2px solid var(--neon); }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+    </style>
+</head>
+<body>
+
+<div id="name-modal">
+    <div class="modal-card">
+        <h2 style="color: white; margin-top: 0;">ENTER STADIUM</h2>
+        <input type="text" id="username-input" class="calc-input" placeholder="Your Fan Name" maxlength="15">
+        <button class="btn" onclick="saveName()">JOIN MATCH HUB</button>
+    </div>
+</div>
+
+<div id="toast-container"></div>
+
+<div id="app">
+    <div class="top-bar"><span class="live-tag">SUPER 8</span><span style="font-weight: 900; font-size: 16px;">PAKISTAN vs SRI LANKA</span></div>
+
+    <div id="match" class="view active">
+        <div class="timer-hero">
+            <div class="timer-title">TOSS COUNTDOWN</div>
+            <div class="timer-grid">
+                <div class="timer-box"><span id="h" class="t-val">00</span><span class="t-lbl">HOURS</span></div>
+                <div class="timer-box"><span id="m" class="t-val">00</span><span class="t-lbl">MINS</span></div>
+                <div class="timer-box"><span id="s" class="t-val">00</span><span class="t-lbl">SECS</span></div>
+            </div>
+        </div>
+
+        <div class="broadcast-board">
+            <div class="bb-header">T20 WORLD CUP 2026</div>
+            
+            <div id="main-board" class="bb-main theme-pak">
+                <div class="bb-team-label">
+                    <img id="main-flag" src="https://flagcdn.com/w80/pk.png" class="main-flag-img">
+                    <span class="main-team-text" id="main-team-name">PAK</span>
+                </div>
+                <div class="bb-score-box" id="main-score">--/--</div>
+                <div class="bb-overs-box" id="match-note">0.0 OVERS</div>
+            </div>
+            
+            <div class="bb-live-stats" id="live-stats-row" style="display:none;">
+                <div class="bb-batters">
+                    <div class="stat-row">
+                        <span class="p-name active" id="b1-name">Waiting...</span>
+                        <div><span class="p-runs" id="b1-runs">0</span><span class="p-balls" id="b1-balls">(0)</span></div>
+                    </div>
+                    <div class="stat-row">
+                        <span class="p-name" id="b2-name">Waiting...</span>
+                        <div><span class="p-runs" id="b2-runs">0</span><span class="p-balls" id="b2-balls">(0)</span></div>
+                    </div>
+                </div>
+                <div class="bb-bowlers">
+                    <div class="stat-row" style="justify-content: flex-end; gap: 10px;">
+                        <span class="p-name" id="bowl-name" style="opacity:0.8;">Bowler</span>
+                        <span class="p-runs" id="bowl-fig" style="color: white;">0-0</span>
+                    </div>
+                    <div class="recent-balls" id="recent-balls-container">
+                        </div>
+                </div>
+            </div>
+
+            <div class="bb-sub">
+                <div class="sub-team-container" id="sub-team-container">
+                    <img src="https://flagcdn.com/w80/lk.png" class="sub-flag-img"> <span>SL</span>
+                </div>
+                <span id="sub-score">Yet to Bat</span>
+            </div>
+
+            <div class="bb-mission" id="mission-box"><span id="mission-text">TARGET: --</span></div>
+            <div class="bb-toss" id="toss-info">Waiting for toss update...</div>
+        </div>
+    </div>
+
+    <div id="calculator" class="view">
+        <div class="card" style="border-left: 4px solid var(--neon);">
+            <h3 style="margin-top:0; color:white;">Miracle Tracker</h3>
+            <label style="font-size: 11px; font-weight: bold; color: rgba(255,255,255,0.6);">TARGET SCORE</label><input type="number" id="calc-target" class="calc-input">
+            <label style="font-size: 11px; font-weight: bold; color: rgba(255,255,255,0.6);">PAK CURRENT RUNS</label><input type="number" id="calc-current" class="calc-input">
+            <label style="font-size: 11px; font-weight: bold; color: rgba(255,255,255,0.6);">OVERS PLAYED</label><input type="number" id="calc-overs" class="calc-input">
+            <button class="btn" onclick="calculateRunRate()">CALCULATE</button>
+            <div id="calc-result" style="display:none; margin-top:15px; text-align:center;">
+                <div id="req-rr" style="font-size: 36px; font-weight: 900; color: var(--neon);">0.00</div>
+                <div id="req-runs" style="font-size: 14px; font-weight: bold;"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="squads" class="view">
+        <div class="squad-toggle">
+            <button id="btn-pak" class="sq-btn active pak" onclick="toggleSquad('pak')">PAK</button>
+            <button id="btn-sl" class="sq-btn sl" onclick="toggleSquad('sl')">SL</button>
+        </div>
+        <div class="card" style="padding: 15px;">
+            <div id="squad-status" style="text-align: center; font-size: 11px; color: var(--neon); font-weight: bold; margin-bottom: 15px;">Awaiting Toss...</div>
+            <div id="list-pak" style="display:none;"></div>
+            <div id="list-sl" style="display:none;"></div>
+        </div>
+    </div>
+
+    <div id="chat" class="view">
+        <div id="chat-view">
+            <div class="msg-list" id="msg-box"></div>
+            <div class="chat-controls">
+                <input type="file" id="img-upload" accept="image/*" onchange="processUpload(event)">
+                <button class="icon-btn" onclick="document.getElementById('img-upload').click()">🖼️</button>
+                <button class="icon-btn" onclick="sendImageLink()">🔗</button>
+                <input type="text" id="chatMsg" placeholder="Message...">
+                <button class="send-btn" onclick="sendTextMsg()">🚀</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="nav-bar">
+        <div class="nav-tab active" onclick="switchTab('match', this)"><i>🏟️</i>MATCH</div>
+        <div class="nav-tab" onclick="switchTab('calculator', this)"><i>⚡</i>CALC</div>
+        <div class="nav-tab" onclick="switchTab('squads', this)"><i>🏏</i>SQUAD</div>
+        <div class="nav-tab" onclick="switchTab('chat', this)"><i>💬</i>FANS</div>
+    </div>
+</div>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyCW3wsozJKqpx4hc--8PXu3FR0FfqPaOW4",
+        authDomain: "pakistan-versus-sri-lanka.firebaseapp.com",
+        databaseURL: "https://pakistan-versus-sri-lanka-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "pakistan-versus-sri-lanka"
+    };
+    const API_KEY = "2e513a4e-c1f5-4367-84a9-2069c1719687";
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    function showToast(m) { const c = document.getElementById('toast-container'); const t = document.createElement('div'); t.className='toast'; t.innerText=m; c.appendChild(t); setTimeout(()=>t.remove(), 4000); }
+    let myName = localStorage.getItem("pak_fan_name");
+    if (!myName) document.getElementById('name-modal').style.display = 'flex';
+    function saveName() { const i = document.getElementById('username-input').value.trim(); if (!i) { showToast("Enter a name!"); return; } myName = i; localStorage.setItem("pak_fan_name", myName); document.getElementById('name-modal').style.display = 'none'; showToast("Welcome, " + myName); }
+    function switchTab(id, el) { document.querySelectorAll('.view, .nav-tab').forEach(e => e.classList.remove('active')); document.getElementById(id).classList.add('active'); el.classList.add('active'); }
+    function toggleSquad(t) { document.querySelectorAll('.sq-btn, .squad-list').forEach(e => e.classList.remove('active')); document.getElementById('btn-'+t).classList.add('active'); document.getElementById('list-'+t).classList.add('active'); }
+
+    function updateScoreboardUI(battingTeam, pakScore, slScore) {
+        const pkFlag = "https://flagcdn.com/w80/pk.png";
+        const slFlag = "https://flagcdn.com/w80/lk.png";
+        if (battingTeam === "SL") {
+            document.getElementById('main-flag').src = slFlag; document.getElementById('main-team-name').innerText = "SL";
+            document.getElementById('main-score').innerText = slScore; document.getElementById('main-board').className = "bb-main theme-sl";
+            document.getElementById('sub-team-container').innerHTML = `<img src="${pkFlag}" class="sub-flag-img"> <span>PAK</span>`;
+            document.getElementById('sub-score').innerText = pakScore;
+        } else {
+            document.getElementById('main-flag').src = pkFlag; document.getElementById('main-team-name').innerText = "PAK";
+            document.getElementById('main-score').innerText = pakScore; document.getElementById('main-board').className = "bb-main theme-pak";
+            document.getElementById('sub-team-container').innerHTML = `<img src="${slFlag}" class="sub-flag-img"> <span>SL</span>`;
+            document.getElementById('sub-score').innerText = slScore;
+        }
+    }
+
+    function detectBattingTeam(pak, sl, adminChoice) {
+        if (adminChoice) return adminChoice;
+        if ((pak.toLowerCase().includes("yet") || pak === "" || pak === "0 / 0") && (!sl.toLowerCase().includes("yet") && sl !== "")) return "SL";
+        return "PAK";
+    }
+
+    // THE SMART BALL COLOR GENERATOR
+    function generateRecentBalls(ballString) {
+        if(!ballString) return "";
+        const balls = ballString.split(/[ ,]+/); // Split by space or comma
+        let html = "";
+        balls.forEach(b => {
+            let bText = b.toUpperCase().trim();
+            if(!bText) return;
+            let cssClass = "ball-circle";
+            if (bText === "W") cssClass += " ball-w";
+            else if (bText === "4") cssClass += " ball-4";
+            else if (bText === "6") cssClass += " ball-6";
+            html += `<div class="${cssClass}">${bText}</div>`;
+        });
+        return html;
+    }
+
+    let isOverrideActive = false;
+    db.ref('admin_controls/score').on('value', snap => {
+        if (snap.exists() && snap.val().override === true) {
+            isOverrideActive = true;
+            const data = snap.val();
+            
+            let battingTeam = detectBattingTeam(data.pak, data.sl, data.batting);
+            updateScoreboardUI(battingTeam, data.pak, data.sl);
+            document.getElementById('match-note').innerText = data.status || "0.0 OVERS";
+            document.getElementById('toss-info').innerText = data.toss || "Toss not updated yet";
+            
+            // Show Live Stats if provided
+            if(data.b1n || data.bowlN) {
+                document.getElementById('live-stats-row').style.display = 'flex';
+                document.getElementById('b1-name').innerText = data.b1n || "Batter 1";
+                document.getElementById('b1-runs').innerText = data.b1r || "0";
+                document.getElementById('b1-balls').innerText = `(${data.b1b || 0})`;
+                
+                document.getElementById('b2-name').innerText = data.b2n || "Batter 2";
+                document.getElementById('b2-runs').innerText = data.b2r || "0";
+                document.getElementById('b2-balls').innerText = `(${data.b2b || 0})`;
+                
+                document.getElementById('bowl-name').innerText = data.bowlN || "Bowler";
+                document.getElementById('bowl-fig').innerText = data.bowlF || "0-0";
+                
+                document.getElementById('recent-balls-container').innerHTML = generateRecentBalls(data.recentB);
+            } else {
+                document.getElementById('live-stats-row').style.display = 'none';
+            }
+
+            if(data.margin && data.margin !== "") {
+                document.getElementById('mission-box').style.display = 'block';
+                document.getElementById('mission-text').innerText = data.margin;
+            } else { document.getElementById('mission-box').style.display = 'none'; }
+        } else {
+            isOverrideActive = false;
+            document.getElementById('live-stats-row').style.display = 'none';
+        }
+    });
+
+    async function getScore() {
+        if (isOverrideActive) return; 
+        try {
+            const res = await fetch(`https://api.cricapi.com/v1/cricScore?apikey=${API_KEY}`);
+            const json = await res.json();
+            const match = json.data.find(m => m.t1.includes("Pakistan") || m.t2.includes("Pakistan"));
+            if (match) {
+                let pakS = "0 / 0", slS = "Yet to Bat";
+                let isPakT1 = match.t1.includes("Pakistan");
+                if (match.ms === "live") { pakS = isPakT1 ? match.t1s : match.t2s; slS = isPakT1 ? match.t2s : match.t1s; }
+                let battingTeam = detectBattingTeam(pakS, slS, null);
+                updateScoreboardUI(battingTeam, pakS, slS);
+                document.getElementById('match-note').innerText = match.status;
+            }
+        } catch (error) { document.getElementById('match-note').innerText = "Awaiting Admin..."; }
+    }
+    setInterval(getScore, 30000); getScore();
+
+    const mt = new Date("Feb 28, 2026 18:30:00").getTime();
+    setInterval(() => { const d = mt - new Date().getTime(); if (d < 0) return; document.getElementById('h').innerText = Math.floor((d % 86400000)/3600000).toString().padStart(2,'0'); document.getElementById('m').innerText = Math.floor((d % 3600000)/60000).toString().padStart(2,'0'); document.getElementById('s').innerText = Math.floor((d % 60000)/1000).toString().padStart(2,'0'); }, 1000);
+    function calculateRunRate() { const t=parseFloat(document.getElementById('calc-target').value), c=parseFloat(document.getElementById('calc-current').value), o=parseFloat(document.getElementById('calc-overs').value); if(isNaN(t)||isNaN(c)||isNaN(o)) return; let b=(20*6)-((Math.floor(o)*6)+Math.round((o-Math.floor(o))*10)); if(b<=0)return; document.getElementById('req-rr').innerText=((t-c)/(b/6)).toFixed(2); document.getElementById('req-runs').innerText=`Need ${t-c} runs in ${b} balls`; document.getElementById('calc-result').style.display='block'; }
+    
+    function checkUser() { if(!myName){ document.getElementById('name-modal').style.display='flex'; return false; } return true; }
+    function sendTextMsg() { if(!checkUser()) return; const i = document.getElementById('chatMsg'); if(!i.value.trim()) return; db.ref('fan_chat').push({ user: myName, text: i.value.trim(), type: 'text', time: Date.now() }); i.value = ""; }
+    function processUpload(e) { if(!checkUser()) return; const f = e.target.files[0]; if(!f) return; if(f.size > 1048576) { showToast("Over 1MB! Use 🔗 Link button."); e.target.value=""; return; } const r = new FileReader(); r.onload = function(ev) { db.ref('fan_chat').push({ user: myName, imageUrl: ev.target.result, type: 'image', time: Date.now() }); showToast("📷 Uploaded!"); }; r.readAsDataURL(f); }
+    function sendImageLink() { if(!checkUser()) return; const u = prompt("Paste direct image link:"); if(u) { db.ref('fan_chat').push({ user: myName, imageUrl: u.trim(), type: 'image', time: Date.now() }); showToast("🔗 Link sent!"); } }
+
+    db.ref('fan_chat').limitToLast(25).on('value', snap => { const b = document.getElementById('msg-box'); if (!snap.exists()) { b.innerHTML = `<div style="text-align:center; opacity:0.5; margin-top:20px;">No cheers yet!</div>`; return; } b.innerHTML = ""; snap.forEach(c => { const m = c.val(); let h = (m.type==='image'||m.imageUrl) ? `<img src="${m.imageUrl}" class="chat-img">` : `<span style="font-size:15px; font-weight: 500;">${m.text ? m.text.replace(/</g,"&lt;") : ""}</span>`; b.innerHTML += m.isAdmin ? `<div class="msg-bubble" style="border:2px solid #ff3333; background:rgba(255,0,0,0.1);"><span class="msg-user" style="color:#ff3333;">${m.user}</span>${h}</div>` : `<div class="msg-bubble"><span class="msg-user">${m.user.toUpperCase()}</span>${h}</div>`; }); b.scrollTop = b.scrollHeight; });
+</script>
+</body>
+</html>
