@@ -10,117 +10,100 @@
 
     <style>
         /* === VISUAL THEME: PATRIOTIC BROADCAST === */
-        :root { --dark: #020503; --glass: rgba(255, 255, 255, 0.08); --glass-border: rgba(255, 255, 255, 0.15); --nav-h: 60px; --neon: #a3ff00; }
-        
+        :root { --dark: #020503; --glass: rgba(255, 255, 255, 0.08); --glass-border: rgba(255, 255, 255, 0.15); --nav-h: 65px; --neon: #a3ff00; }
         * { box-sizing: border-box; font-family: 'Segoe UI', Roboto, sans-serif; user-select: none; -webkit-tap-highlight-color: transparent; }
-        
-        /* THE DYNAMIC HEIGHT FIX (100dvh) */
         body { background: var(--dark); color: white; margin: 0; padding: 0; height: 100dvh; overflow: hidden; display: flex; flex-direction: column; }
         input { user-select: auto; }
-        
         #app { display: flex; flex-direction: column; height: 100%; width: 100%; position: relative; overflow: hidden; }
         
+        /* Header */
         .top-bar { flex-shrink: 0; padding: 12px; text-align: center; background: rgba(0,0,0,0.8); border-bottom: 1px solid var(--glass); z-index: 10; }
-        .live-tag { background: #ff004c; padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: 900; letter-spacing: 1px; vertical-align: middle; margin-right: 8px; animation: pulse 1.5s infinite; }
+        .live-tag { background: #ff004c; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 900; letter-spacing: 1px; vertical-align: middle; margin-right: 8px; animation: pulse 1.5s infinite; }
         
-        /* THE LAYOUT ENGINE FIX */
+        /* Layout */
         .view-wrapper { flex: 1; position: relative; overflow: hidden; }
-        .view { position: absolute; top: 0; left: 0; right: 0; bottom: 0; overflow-y: auto; padding: 12px; padding-bottom: 85px; display: none; flex-direction: column; }
+        .view { position: absolute; top: 0; left: 0; right: 0; bottom: 0; overflow-y: auto; padding: 15px; padding-bottom: 90px; display: none; flex-direction: column; }
         .view.active { display: flex; animation: fadeIn 0.3s ease; }
 
-        /* Timer (Scaled down for mobile) */
-        .timer-hero { background: linear-gradient(180deg, #111, var(--dark)); padding: 15px; border-radius: 14px; text-align: center; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 12px; }
-        .timer-title { font-size: 10px; font-weight: bold; letter-spacing: 2px; color: rgba(255,255,255,0.7); margin-bottom: 10px; }
-        .timer-grid { display: flex; justify-content: center; gap: 10px; }
-        .timer-box { background: rgba(0,0,0,0.4); width: 55px; padding: 8px 0; border-radius: 10px; border: 1px solid rgba(255,255,255,0.2); }
-        .t-val { display: block; font-size: 22px; font-weight: 900; color: var(--neon); }
-        .t-lbl { font-size: 8px; opacity: 0.6; color: white; }
+        /* Timer */
+        .timer-hero { background: linear-gradient(180deg, #111, var(--dark)); padding: 20px 15px; border-radius: 16px; text-align: center; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 20px; }
+        .timer-title { font-size: 12px; font-weight: bold; letter-spacing: 2px; color: rgba(255,255,255,0.7); margin-bottom: 12px; }
+        .timer-grid { display: flex; justify-content: center; gap: 12px; }
+        .timer-box { background: rgba(0,0,0,0.4); width: 65px; padding: 12px 0; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2); }
+        .t-val { display: block; font-size: 26px; font-weight: 900; color: var(--neon); }
+        .t-lbl { font-size: 9px; opacity: 0.6; color: white; margin-top: 4px; display: block; }
 
-        /* ========================================= */
-        /* HIGH-DEF BROADCAST SCOREBOARD (Rescaled)  */
-        /* ========================================= */
-        .broadcast-board { border-radius: 12px; overflow: hidden; border: 1px solid #333; margin-bottom: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.8); background: #111; flex-shrink: 0; }
-        .bb-header { background: #000; padding: 6px; text-align: center; font-size: 10px; font-weight: bold; color: rgba(255,255,255,0.6); letter-spacing: 1.5px; }
-        
+        /* Scoreboard UI */
+        .broadcast-board { border-radius: 14px; overflow: hidden; border: 1px solid #333; margin-bottom: 20px; box-shadow: 0 8px 25px rgba(0,0,0,0.9); background: #111; flex-shrink: 0; }
+        .bb-header { background: #000; padding: 8px; text-align: center; font-size: 11px; font-weight: bold; color: rgba(255,255,255,0.6); letter-spacing: 1.5px; }
         .theme-pak { background: #01411C; border-bottom: 3px solid #a3ff00; }
         .theme-pak .bb-score-box { background: #000; color: #a3ff00; border-left: 2px solid #a3ff00; }
         .theme-sl { background: #002366; border-bottom: 3px solid #FFD700; }
         .theme-sl .bb-score-box { background: #000; color: #FFD700; border-left: 2px solid #FFD700; }
-
         .bb-main { display: flex; transition: background 0.3s; }
-        .bb-team-label { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 8px; border-right: 1px solid rgba(255,255,255,0.1); }
-        .main-flag-img { width: 35px; height: auto; border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.5); margin-bottom: 4px; }
-        .main-team-text { font-size: 18px; font-weight: 900; color: white; line-height: 1; }
-        .bb-score-box { flex: 2; font-size: 24px; font-weight: 900; display: flex; align-items: center; justify-content: center; }
-        .bb-overs-box { background: white; color: black; font-size: 12px; font-weight: 900; padding: 8px; display: flex; align-items: center; justify-content: center; min-width: 75px; text-align: center; }
+        .bb-team-label { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 12px; border-right: 1px solid rgba(255,255,255,0.1); }
+        .main-flag-img { width: 48px; height: auto; border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.5); margin-bottom: 6px; }
+        .main-team-text { font-size: 24px; font-weight: 900; color: white; line-height: 1; }
+        .bb-score-box { flex: 2; font-size: 38px; font-weight: 900; display: flex; align-items: center; justify-content: center; padding: 15px 10px; }
+        .bb-overs-box { background: white; color: black; font-size: 15px; font-weight: 900; padding: 10px; display: flex; align-items: center; justify-content: center; min-width: 85px; text-align: center; }
         
         /* Live Stats Row */
-        .bb-live-stats { display: flex; background: #151525; border-bottom: 1px solid #333; font-size: 11px; }
-        .bb-batters { flex: 1.2; padding: 8px; border-right: 1px solid #333; }
-        .bb-bowlers { flex: 1; padding: 8px; display: flex; flex-direction: column; justify-content: space-between; }
-        .stat-row { display: flex; justify-content: space-between; margin-bottom: 6px; align-items: center; }
+        .bb-live-stats { display: flex; background: #151525; border-bottom: 1px solid #333; font-size: 13px; }
+        .bb-batters { flex: 1.2; padding: 12px; border-right: 1px solid #333; }
+        .bb-bowlers { flex: 1; padding: 12px; display: flex; flex-direction: column; justify-content: space-between; }
+        .stat-row { display: flex; justify-content: space-between; margin-bottom: 8px; align-items: center; }
         .stat-row:last-child { margin-bottom: 0; }
-        .p-name { font-weight: bold; color: white; display: flex; align-items: center; gap: 4px;}
-        .p-name.active::before { content: "🏏"; font-size: 9px; }
-        .p-runs { font-weight: 900; color: #FFD700; font-size: 12px;}
-        .p-balls { opacity: 0.6; font-size: 9px; margin-left: 4px; color: white; }
-        
-        /* Recent Balls Timeline */
-        .recent-balls { display: flex; gap: 3px; margin-top: 6px; justify-content: flex-end; }
-        .ball-circle { width: 18px; height: 18px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 9px; font-weight: 900; background: #333; color: white; border: 1px solid rgba(255,255,255,0.2); }
+        .p-name { font-weight: bold; color: white; display: flex; align-items: center; gap: 5px;}
+        .p-name.active::before { content: "🏏"; font-size: 10px; }
+        .p-runs { font-weight: 900; color: #FFD700; font-size: 14px;}
+        .p-balls { opacity: 0.6; font-size: 10px; margin-left: 5px; color: white; }
+        .recent-balls { display: flex; gap: 4px; margin-top: 8px; justify-content: flex-end; }
+        .ball-circle { width: 22px; height: 22px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 10px; font-weight: 900; background: #333; color: white; border: 1px solid rgba(255,255,255,0.2); }
         .ball-4 { background: #007bff; border-color: #007bff; }
         .ball-6 { background: #8e44ad; border-color: #8e44ad; }
         .ball-w { background: #dc3545; border-color: #dc3545; }
 
-        .bb-sub { display: flex; background: #0a0a0a; padding: 8px 12px; justify-content: space-between; align-items: center; font-size: 14px; font-weight: bold; color: rgba(255,255,255,0.8); }
-        .sub-team-container { display: flex; align-items: center; gap: 8px; }
-        .sub-flag-img { width: 20px; border-radius: 2px; }
-        
-        .bb-mission { background: #e0e0e0; color: #d81b60; text-align: center; padding: 6px; font-size: 11px; font-weight: 900; text-transform: uppercase; display: none; }
-        .bb-toss { background: #FFD700; color: #000; text-align: center; padding: 6px; font-size: 10px; font-weight: 900; text-transform: uppercase; border-top: 1px solid #ccaa00; }
+        .bb-sub { display: flex; background: #0a0a0a; padding: 12px 15px; justify-content: space-between; align-items: center; font-size: 18px; font-weight: bold; color: rgba(255,255,255,0.8); }
+        .sub-team-container { display: flex; align-items: center; gap: 10px; }
+        .sub-flag-img { width: 26px; border-radius: 3px; }
+        .bb-mission { background: #e0e0e0; color: #d81b60; text-align: center; padding: 10px; font-size: 13px; font-weight: 900; text-transform: uppercase; display: none; }
+        .bb-toss { background: #FFD700; color: #000; text-align: center; padding: 8px; font-size: 11px; font-weight: 900; text-transform: uppercase; border-top: 1px solid #ccaa00; }
 
         /* Other UI */
         .card { background: var(--glass); border-radius: 16px; padding: 15px; border: 1px solid var(--glass-border); margin-bottom: 15px; flex-shrink: 0;}
-        .btn { background: #01411C; color: white; border: 1px solid #a3ff00; padding: 12px; border-radius: 10px; font-weight: 900; font-size: 14px; width: 100%; margin-top: 10px; text-transform: uppercase; }
+        .btn { background: #01411C; color: white; border: 1px solid #a3ff00; padding: 15px; border-radius: 10px; font-weight: 900; font-size: 16px; width: 100%; margin-top: 10px; text-transform: uppercase; }
+        .calc-input { width: 100%; background: rgba(0,0,0,0.4); border: 1px solid var(--glass-border); color: white; padding: 15px; border-radius: 10px; font-size: 16px; outline: none; margin-bottom: 10px; }
         
-        /* 16px font-size prevents iOS Auto-Zoom */
-        .calc-input { width: 100%; background: rgba(0,0,0,0.4); border: 1px solid var(--glass-border); color: white; padding: 12px; border-radius: 10px; font-size: 16px; outline: none; margin-bottom: 10px; }
-        
-        .squad-toggle { display: flex; background: rgba(0,0,0,0.5); border-radius: 10px; padding: 4px; margin-bottom: 12px; border: 1px solid var(--glass-border); flex-shrink: 0; }
-        .sq-btn { flex: 1; background: transparent; border: none; color: rgba(255,255,255,0.5); padding: 10px; font-weight: bold; border-radius: 6px; transition: 0.3s; font-size: 12px; }
+        /* Squad Section Fixes */
+        .squad-toggle { display: flex; background: rgba(0,0,0,0.5); border-radius: 10px; padding: 5px; margin-bottom: 15px; border: 1px solid var(--glass-border); flex-shrink: 0; }
+        .sq-btn { flex: 1; background: transparent; border: none; color: rgba(255,255,255,0.5); padding: 12px; font-weight: bold; border-radius: 6px; transition: 0.3s; font-size: 14px; }
         .sq-btn.active.pak { background: #01411C; color: white; }
         .sq-btn.active.sl { background: #002366; color: white; }
         .squad-list { display: none; }
         .squad-list.active { display: block; animation: slideUp 0.3s ease; }
-        .player-item { padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 13px; display: flex; align-items: center; gap: 8px; }
+        .player-item { padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 14px; display: flex; align-items: center; gap: 8px; }
 
-        /* ========================================= */
-        /* BULLETPROOF CHAT LAYOUT                   */
-        /* ========================================= */
+        /* Chat */
         .msg-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-bottom: 10px; }
-        .msg-bubble { background: #111; padding: 10px 14px; border-radius: 16px; border-bottom-left-radius: 4px; border: 1px solid var(--glass-border); word-wrap: break-word; }
-        .msg-user { color: var(--neon); font-size: 10px; font-weight: 900; margin-bottom: 4px; display: block;}
+        .msg-bubble { background: #111; padding: 12px 16px; border-radius: 16px; border-bottom-left-radius: 4px; border: 1px solid var(--glass-border); word-wrap: break-word; }
+        .msg-user { color: var(--neon); font-size: 11px; font-weight: 900; margin-bottom: 4px; display: block;}
         .chat-img { max-width: 100%; border-radius: 10px; margin-top: 5px; border: 1px solid var(--glass-border); }
-        
-        /* Flex-shrink: 0 keeps controls locked at bottom, above nav padding */
-        .chat-controls { flex-shrink: 0; display: flex; gap: 6px; background: rgba(0,0,0,0.9); padding: 8px; border-radius: 25px; border: 1px solid var(--glass-border); align-items: center; }
-        
-        /* 16px font-size prevents iOS Auto-Zoom */
-        .chat-controls input[type="text"] { background: none; border: none; color: white; flex: 1; outline: none; padding-left: 8px; font-size: 16px; min-width: 0; }
-        .icon-btn { background: none; border: none; font-size: 20px; cursor: pointer; padding: 4px; flex: 0 0 auto; filter: grayscale(0%); }
-        .send-btn { background: var(--neon) !important; color: black !important; border: none !important; border-radius: 50% !important; width: 40px !important; height: 40px !important; min-width: 40px !important; flex: 0 0 auto !important; display: flex !important; justify-content: center !important; align-items: center !important; font-size: 16px !important; margin-left: 2px; cursor: pointer; }
+        .chat-controls { flex-shrink: 0; display: flex; gap: 6px; background: rgba(0,0,0,0.9); padding: 8px; border-radius: 30px; border: 1px solid var(--glass-border); align-items: center; }
+        .chat-controls input[type="text"] { background: none; border: none; color: white; flex: 1; outline: none; padding-left: 10px; font-size: 16px; min-width: 0; }
+        .icon-btn { background: none; border: none; font-size: 24px; cursor: pointer; padding: 4px; flex: 0 0 auto; filter: grayscale(0%); }
+        .send-btn { background: var(--neon) !important; color: black !important; border: none !important; border-radius: 50% !important; width: 45px !important; height: 45px !important; min-width: 45px !important; flex: 0 0 auto !important; display: flex !important; justify-content: center !important; align-items: center !important; font-size: 18px !important; margin-left: 2px; cursor: pointer; }
         #img-upload { display: none; }
 
-        /* Nav */
+        /* Nav & Overlays */
         .nav-bar { position: absolute; bottom: 12px; left: 12px; right: 12px; height: var(--nav-h); background: rgba(15,15,15,0.95); backdrop-filter: blur(20px); border-radius: 20px; border: 1px solid var(--glass-border); display: flex; justify-content: space-around; align-items: center; z-index: 1000; box-shadow: 0 5px 20px rgba(0,0,0,0.8); }
-        .nav-tab { color: rgba(255,255,255,0.4); text-align: center; font-size: 9px; flex: 1; font-weight: bold; transition: 0.2s;}
+        .nav-tab { color: rgba(255,255,255,0.4); text-align: center; font-size: 10px; flex: 1; font-weight: bold; transition: 0.2s;}
         .nav-tab.active { color: white; transform: translateY(-3px); }
-        .nav-tab i { display: block; font-size: 20px; margin-bottom: 3px; }
+        .nav-tab i { display: block; font-size: 24px; margin-bottom: 3px; }
         
-        #name-modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.9); display: flex; justify-content: center; align-items: center; z-index: 9999; padding: 20px; }
-        .modal-card { background: var(--dark); border: 2px solid var(--neon); border-radius: 20px; padding: 25px; width: 100%; text-align: center; }
+        #name-modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.9); display: none; justify-content: center; align-items: center; z-index: 9999; padding: 20px; animation: fadeIn 0.3s ease; }
+        .modal-card { background: var(--dark); border: 2px solid var(--neon); border-radius: 20px; padding: 25px; width: 100%; text-align: center; box-shadow: 0 0 30px rgba(163,255,0,0.1);}
         #toast-container { position: fixed; bottom: 90px; left: 0; right: 0; display: flex; flex-direction: column; align-items: center; gap: 8px; z-index: 8000; pointer-events: none; }
-        .toast { background: white; color: black; padding: 10px 20px; border-radius: 20px; font-weight: bold; font-size: 12px; animation: slideUp 0.3s forwards, fadeOut 0.3s forwards 3.7s; text-align: center; border: 2px solid var(--neon); box-shadow: 0 4px 10px rgba(0,0,0,0.5);}
+        .toast { background: white; color: black; padding: 12px 24px; border-radius: 30px; font-weight: bold; font-size: 13px; animation: slideUp 0.3s forwards, fadeOut 0.3s forwards 3.7s; text-align: center; border: 2px solid var(--neon); box-shadow: 0 4px 10px rgba(0,0,0,0.5);}
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
@@ -132,16 +115,18 @@
 
 <div id="name-modal">
     <div class="modal-card">
-        <h2 style="color: white; margin-top: 0;">ENTER STADIUM</h2>
+        <h2 style="color: white; margin-top: 0;">WHO IS CHEERING?</h2>
+        <p style="font-size: 12px; opacity: 0.7; margin-bottom: 20px;">Enter your Fan Name to unlock the chat room.</p>
         <input type="text" id="username-input" class="calc-input" placeholder="Your Fan Name" maxlength="15">
-        <button class="btn" onclick="saveName()">JOIN MATCH HUB</button>
+        <button class="btn" onclick="saveName()">UNLOCK CHAT</button>
+        <button onclick="closeNameModal()" style="background:none; border:none; color:#888; font-size:12px; margin-top:15px; text-decoration:underline;">Cancel</button>
     </div>
 </div>
 
 <div id="toast-container"></div>
 
 <div id="app">
-    <div class="top-bar"><span class="live-tag">SUPER 8</span><span style="font-weight: 900; font-size: 14px;">PAKISTAN vs SRI LANKA</span></div>
+    <div class="top-bar"><span class="live-tag">SUPER 8</span><span style="font-weight: 900; font-size: 15px;">PAKISTAN vs SRI LANKA</span></div>
 
     <div class="view-wrapper">
         <div id="match" class="view active">
@@ -200,14 +185,14 @@
 
         <div id="calculator" class="view">
             <div class="card" style="border-left: 4px solid var(--neon);">
-                <h3 style="margin-top:0; color:white; font-size:16px;">Miracle Tracker</h3>
-                <label style="font-size: 10px; font-weight: bold; color: rgba(255,255,255,0.6);">TARGET SCORE</label><input type="number" id="calc-target" class="calc-input">
-                <label style="font-size: 10px; font-weight: bold; color: rgba(255,255,255,0.6);">PAK CURRENT RUNS</label><input type="number" id="calc-current" class="calc-input">
-                <label style="font-size: 10px; font-weight: bold; color: rgba(255,255,255,0.6);">OVERS PLAYED</label><input type="number" id="calc-overs" class="calc-input">
+                <h3 style="margin-top:0; color:white; font-size:18px;">Miracle Tracker</h3>
+                <label style="font-size: 11px; font-weight: bold; color: rgba(255,255,255,0.6);">TARGET SCORE</label><input type="number" id="calc-target" class="calc-input">
+                <label style="font-size: 11px; font-weight: bold; color: rgba(255,255,255,0.6);">PAK CURRENT RUNS</label><input type="number" id="calc-current" class="calc-input">
+                <label style="font-size: 11px; font-weight: bold; color: rgba(255,255,255,0.6);">OVERS PLAYED</label><input type="number" id="calc-overs" class="calc-input">
                 <button class="btn" onclick="calculateRunRate()">CALCULATE</button>
                 <div id="calc-result" style="display:none; margin-top:15px; text-align:center;">
-                    <div id="req-rr" style="font-size: 32px; font-weight: 900; color: var(--neon);">0.00</div>
-                    <div id="req-runs" style="font-size: 12px; font-weight: bold;"></div>
+                    <div id="req-rr" style="font-size: 38px; font-weight: 900; color: var(--neon);">0.00</div>
+                    <div id="req-runs" style="font-size: 14px; font-weight: bold;"></div>
                 </div>
             </div>
         </div>
@@ -217,10 +202,16 @@
                 <button id="btn-pak" class="sq-btn active pak" onclick="toggleSquad('pak')">PAK</button>
                 <button id="btn-sl" class="sq-btn sl" onclick="toggleSquad('sl')">SL</button>
             </div>
-            <div class="card">
-                <div id="squad-status" style="text-align: center; font-size: 10px; color: var(--neon); font-weight: bold; margin-bottom: 12px;">Awaiting Toss...</div>
-                <div id="list-pak" style="display:none;"></div>
-                <div id="list-sl" style="display:none;"></div>
+            <div class="card" style="padding: 15px;">
+                <div id="squad-status" style="text-align: center; font-size: 11px; color: var(--neon); font-weight: bold; margin-bottom: 15px; text-transform: uppercase;">AWAITING TOSS / ADMIN UPDATE...</div>
+                
+                <div id="list-pak" class="squad-list active">
+                    <div style="text-align:center; opacity:0.5; font-style:italic;">Waiting for Pakistan 11...</div>
+                </div>
+                
+                <div id="list-sl" class="squad-list">
+                    <div style="text-align:center; opacity:0.5; font-style:italic;">Waiting for Sri Lanka 11...</div>
+                </div>
             </div>
         </div>
 
@@ -228,10 +219,10 @@
             <div class="msg-list" id="msg-box"></div>
             <div class="chat-controls">
                 <input type="file" id="img-upload" accept="image/*" onchange="processUpload(event)">
-                <button class="icon-btn" onclick="document.getElementById('img-upload').click()">🖼️</button>
-                <button class="icon-btn" onclick="sendImageLink()">🔗</button>
+                <button class="icon-btn" onclick="triggerAuthOrAction('image')">🖼️</button>
+                <button class="icon-btn" onclick="triggerAuthOrAction('link')">🔗</button>
                 <input type="text" id="chatMsg" placeholder="Message...">
-                <button class="send-btn" onclick="sendTextMsg()">🚀</button>
+                <button class="send-btn" onclick="triggerAuthOrAction('text')">🚀</button>
             </div>
         </div>
     </div>
@@ -257,8 +248,22 @@
 
     function showToast(m) { const c = document.getElementById('toast-container'); const t = document.createElement('div'); t.className='toast'; t.innerText=m; c.appendChild(t); setTimeout(()=>t.remove(), 4000); }
     let myName = localStorage.getItem("pak_fan_name");
-    if (!myName) document.getElementById('name-modal').style.display = 'flex';
-    function saveName() { const i = document.getElementById('username-input').value.trim(); if (!i) { showToast("Enter a name!"); return; } myName = i; localStorage.setItem("pak_fan_name", myName); document.getElementById('name-modal').style.display = 'none'; showToast("Welcome, " + myName); }
+    
+    function closeNameModal() { document.getElementById('name-modal').style.display = 'none'; }
+    function saveName() { 
+        const i = document.getElementById('username-input').value.trim(); 
+        if (!i) { showToast("Enter a name to continue!"); return; } 
+        myName = i; localStorage.setItem("pak_fan_name", myName); 
+        closeNameModal(); showToast("Welcome to the Stadium, " + myName + "!"); 
+    }
+
+    function triggerAuthOrAction(actionType) {
+        if (!myName) { document.getElementById('name-modal').style.display = 'flex'; return; }
+        if(actionType === 'text') sendTextMsg();
+        if(actionType === 'image') document.getElementById('img-upload').click();
+        if(actionType === 'link') sendImageLink();
+    }
+
     function switchTab(id, el) { document.querySelectorAll('.view, .nav-tab').forEach(e => e.classList.remove('active')); document.getElementById(id).classList.add('active'); el.classList.add('active'); }
     function toggleSquad(t) { document.querySelectorAll('.sq-btn, .squad-list').forEach(e => e.classList.remove('active')); document.getElementById('btn-'+t).classList.add('active'); document.getElementById('list-'+t).classList.add('active'); }
 
@@ -305,7 +310,6 @@
         if (snap.exists() && snap.val().override === true) {
             isOverrideActive = true;
             const data = snap.val();
-            
             let battingTeam = detectBattingTeam(data.pak, data.sl, data.batting);
             updateScoreboardUI(battingTeam, data.pak, data.sl);
             document.getElementById('match-note').innerText = data.status || "0.0 OVERS";
@@ -332,6 +336,14 @@
         }
     });
 
+    db.ref('admin_controls/squads').on('value', snap => {
+        if (snap.exists()) {
+            document.getElementById('list-pak').innerHTML = snap.val().pak.split(/[\n,]+/).map(p => `<div class="player-item">🏏 <b>${p.trim()}</b></div>`).join('');
+            document.getElementById('list-sl').innerHTML = snap.val().sl.split(/[\n,]+/).map(p => `<div class="player-item">🏏 <b>${p.trim()}</b></div>`).join('');
+            document.getElementById('squad-status').innerText = "LIVE PLAYING 11 CONFIRMED";
+        }
+    });
+
     async function getScore() {
         if (isOverrideActive) return; 
         try {
@@ -354,12 +366,11 @@
     setInterval(() => { const d = mt - new Date().getTime(); if (d < 0) return; document.getElementById('h').innerText = Math.floor((d % 86400000)/3600000).toString().padStart(2,'0'); document.getElementById('m').innerText = Math.floor((d % 3600000)/60000).toString().padStart(2,'0'); document.getElementById('s').innerText = Math.floor((d % 60000)/1000).toString().padStart(2,'0'); }, 1000);
     function calculateRunRate() { const t=parseFloat(document.getElementById('calc-target').value), c=parseFloat(document.getElementById('calc-current').value), o=parseFloat(document.getElementById('calc-overs').value); if(isNaN(t)||isNaN(c)||isNaN(o)) return; let b=(20*6)-((Math.floor(o)*6)+Math.round((o-Math.floor(o))*10)); if(b<=0)return; document.getElementById('req-rr').innerText=((t-c)/(b/6)).toFixed(2); document.getElementById('req-runs').innerText=`Need ${t-c} runs in ${b} balls`; document.getElementById('calc-result').style.display='block'; }
     
-    function checkUser() { if(!myName){ document.getElementById('name-modal').style.display='flex'; return false; } return true; }
-    function sendTextMsg() { if(!checkUser()) return; const i = document.getElementById('chatMsg'); if(!i.value.trim()) return; db.ref('fan_chat').push({ user: myName, text: i.value.trim(), type: 'text', time: Date.now() }); i.value = ""; }
-    function processUpload(e) { if(!checkUser()) return; const f = e.target.files[0]; if(!f) return; if(f.size > 1048576) { showToast("Over 1MB! Use 🔗 Link button."); e.target.value=""; return; } const r = new FileReader(); r.onload = function(ev) { db.ref('fan_chat').push({ user: myName, imageUrl: ev.target.result, type: 'image', time: Date.now() }); showToast("📷 Uploaded!"); }; r.readAsDataURL(f); }
-    function sendImageLink() { if(!checkUser()) return; const u = prompt("Paste direct image link:"); if(u) { db.ref('fan_chat').push({ user: myName, imageUrl: u.trim(), type: 'image', time: Date.now() }); showToast("🔗 Link sent!"); } }
+    function sendTextMsg() { const i = document.getElementById('chatMsg'); if(!i.value.trim()) return; db.ref('fan_chat').push({ user: myName, text: i.value.trim(), type: 'text', time: Date.now() }); i.value = ""; }
+    function processUpload(e) { const f = e.target.files[0]; if(!f) return; if(f.size > 1048576) { showToast("Over 1MB! Use 🔗 Link button."); e.target.value=""; return; } const r = new FileReader(); r.onload = function(ev) { db.ref('fan_chat').push({ user: myName, imageUrl: ev.target.result, type: 'image', time: Date.now() }); showToast("📷 Uploaded!"); }; r.readAsDataURL(f); }
+    function sendImageLink() { const u = prompt("Paste direct image link:"); if(u) { db.ref('fan_chat').push({ user: myName, imageUrl: u.trim(), type: 'image', time: Date.now() }); showToast("🔗 Link sent!"); } }
 
-    db.ref('fan_chat').limitToLast(25).on('value', snap => { const b = document.getElementById('msg-box'); if (!snap.exists()) { b.innerHTML = `<div style="text-align:center; opacity:0.5; margin-top:20px;">No cheers yet!</div>`; return; } b.innerHTML = ""; snap.forEach(c => { const m = c.val(); let h = (m.type==='image'||m.imageUrl) ? `<img src="${m.imageUrl}" class="chat-img">` : `<span style="font-size:13px; font-weight: 500;">${m.text ? m.text.replace(/</g,"&lt;") : ""}</span>`; b.innerHTML += m.isAdmin ? `<div class="msg-bubble" style="border:2px solid #ff3333; background:rgba(255,0,0,0.1);"><span class="msg-user" style="color:#ff3333;">${m.user}</span>${h}</div>` : `<div class="msg-bubble"><span class="msg-user">${m.user.toUpperCase()}</span>${h}</div>`; }); b.scrollTop = b.scrollHeight; });
+    db.ref('fan_chat').limitToLast(25).on('value', snap => { const b = document.getElementById('msg-box'); if (!snap.exists()) { b.innerHTML = `<div style="text-align:center; opacity:0.5; margin-top:20px;">No cheers yet!</div>`; return; } b.innerHTML = ""; snap.forEach(c => { const m = c.val(); let h = (m.type==='image'||m.imageUrl) ? `<img src="${m.imageUrl}" class="chat-img">` : `<span style="font-size:14px; font-weight: 500;">${m.text ? m.text.replace(/</g,"&lt;") : ""}</span>`; b.innerHTML += m.isAdmin ? `<div class="msg-bubble" style="border:2px solid #ff3333; background:rgba(255,0,0,0.1);"><span class="msg-user" style="color:#ff3333;">${m.user}</span>${h}</div>` : `<div class="msg-bubble"><span class="msg-user">${m.user.toUpperCase()}</span>${h}</div>`; }); b.scrollTop = b.scrollHeight; });
 </script>
 </body>
 </html>
